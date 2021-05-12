@@ -13,19 +13,6 @@ df['overweight'] = [1 if bmi > 25 else 0 for bmi in (df['weight'] / ((df['height
 for column in ['cholesterol', 'gluc']:
     df[column] = [0 if a == 1 else 1 for a in df[column].values]
 
-df_heat = df[(df['ap_lo'] <= df['ap_hi']) & (df['height'] >= df['height'].quantile(0.025)) & (df['height'] <= df['height'].quantile(0.975)) & (df['weight'] >= df['weight'].quantile(0.025)) & (df['weight'] <= df['weight'].quantile(0.975))]
-corr = df_heat.corr(method='pearson')
-
-mask = np.triu(corr)
-
-print(corr)
-print(mask)
-f, ax = plt.subplots(figsize=(11,9))
-sns.heatmap(corr, square=True)
-
-f.savefig('heatmap.png')
-print(f)
-
 # Draw Categorical Plot
 def draw_cat_plot():
     # Create DataFrame for cat plot using `pd.melt` using just the values from 'cholesterol', 'gluc', 'smoke', 'alco', 'active', and 'overweight'.
@@ -36,7 +23,7 @@ def draw_cat_plot():
     df_cat = df_cat.groupby(by=['cardio', 'variable', 'value']).count().reset_index()
 
     # Draw the catplot with 'sns.catplot()'
-    fig = sns.catplot(x='variable', y='total', hue='value', data=df_cat, col='cardio', kind='bar')
+    fig = sns.catplot(x='variable', y='total', hue='value', data=df_cat, col='cardio', kind='bar').fig
 
 
     # Do not modify the next two lines
@@ -53,20 +40,13 @@ def draw_heat_map():
     corr = df_heat.corr(method='pearson')
 
     # Generate a mask for the upper triangle
-    mask = corr
-    for col, column in enumerate(mask.columns):
-        temp = mask[column]
-        for row in range(mask.shape[1]):
-            if row <= col: temp[row] = 1
-            else: temp[row] = 0
-
-        mask[column] = temp
+    mask = np.triu(corr)
 
     # Set up the matplotlib figure
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(11,9))
 
     # Draw the heatmap with 'sns.heatmap()'
-    
+    sns.heatmap(corr, mask=mask, annot=True, fmt='.1f', square=True)
 
 
     # Do not modify the next two lines
